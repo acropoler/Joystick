@@ -1,0 +1,639 @@
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
+
+#define PIN 2
+
+// vertical neopixels on pin 8
+//outside neopixels on pin 2
+//joystick side horizontal pixels on pin 3
+//button side horizontal pixels on pin 4
+Adafruit_NeoPixel outerstrip = Adafruit_NeoPixel(52, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel Vstrip = Adafruit_NeoPixel(9, 8, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel LHstrip = Adafruit_NeoPixel(7, 3, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel RHstrip = Adafruit_NeoPixel(7, 4, NEO_GRB + NEO_KHZ800);
+
+String(currentDirection)="none";
+int Vled=0;
+int currentLED=-1;
+int myarray[52];
+int tempGreen=255;
+int tempRed=255;
+int tempBlue=255;
+int currentHolder;
+int currentButton;
+int arrayholder=0;
+int sensorPin = A0;  
+int sensorPin1 = A1;
+int sensorPin2 = A2;
+int sensorPin3 = A3;
+int ledPin = 13;      
+int sensorValue = 0;  
+int sensorValue1 = 0;
+int sensorValue2 = 0;
+int sensorValue3 = 0;
+int redButton=5;
+int greenButton=6;
+int blueButton=7;
+
+void setup() 
+{
+   LHstrip.begin();
+   RHstrip.begin();
+   Vstrip.begin();
+   outerstrip.begin();
+    LHstrip.show();
+   RHstrip.show();
+   Vstrip.show();
+   outerstrip.show();
+   outerstrip.setBrightness(32);
+    LHstrip.setBrightness(32);
+     RHstrip.setBrightness(32);
+ Vstrip.setBrightness(32);
+  Serial.begin(9600);
+  pinMode(greenButton, INPUT_PULLUP);
+  pinMode(redButton, INPUT_PULLUP);
+  pinMode(blueButton, INPUT_PULLUP);
+ pinMode(A0, INPUT);
+ pinMode(A1, INPUT);
+ pinMode(A2, INPUT);
+ pinMode(A3, INPUT);
+}
+
+void loop() {
+  // read the value from the sensor:
+sensorValue = analogRead(sensorPin);
+sensorValue1 = analogRead(sensorPin1);
+sensorValue2 = analogRead(sensorPin2);
+sensorValue3 = analogRead(sensorPin3);
+blueButton=digitalRead(7);
+greenButton=digitalRead(6);
+redButton=digitalRead(5);
+
+if (greenButton==0)
+{
+setGreen();
+}
+
+if (redButton==0)
+{
+setRed();
+}
+
+if (blueButton==0)
+{
+setBlue();
+}
+  
+if (sensorValue1 == 0)
+{currentDirection="Left";
+Serial.println("Left");
+if (arrayholder<52){
+myarray[arrayholder]= 1;
+arrayholder=arrayholder+1;}
+leftPick();
+}
+if (sensorValue == 0)
+{currentDirection="Right";
+Serial.println("Right");
+if (arrayholder<52){
+myarray[arrayholder]= 2;
+arrayholder=arrayholder+1;}
+rightPick();
+}
+if (sensorValue2 == 0)
+{currentDirection="Down";
+Serial.println("Down");
+if (arrayholder<52){
+myarray[arrayholder]= 3;
+arrayholder=arrayholder+1;}
+downPick();
+}
+if (sensorValue3 == 0)
+{currentDirection="Up";
+Serial.println("Up");
+if (arrayholder<52){
+myarray[arrayholder]= 4;
+arrayholder=arrayholder+1;}
+upPick();
+}
+
+ //Serial.println(myarray[arrayholder-1]); 
+ delay(200);
+}
+void rightPick() /////////////////////////////////////////////////////////////////////////////////////
+{
+   if ((currentLED==46) or (currentLED==47))
+   { 
+ outerstrip.setPixelColor(currentLED, 0, 0, 0);
+ outerstrip.show();
+ LHstrip.setPixelColor(6, tempRed, tempGreen, tempBlue);
+ LHstrip.show();
+  currentLED=74;
+ Serial.println(currentLED);
+ return;
+ }
+  if (currentLED==15)
+    {currentLED=0;
+ outerstrip.setPixelColor(15, 0, 0, 0);
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+ }
+   if (currentLED<15)
+   { currentLED=currentLED+1;
+ outerstrip.setPixelColor(currentLED-1, 0, 0, 0);
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+ }
+  if ((currentLED<42) and (currentLED>25))
+   { currentLED=currentLED-1;
+ outerstrip.setPixelColor(currentLED+1, 0, 0, 0);
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ Serial.println(currentLED);
+ return;
+ }
+ if ((currentLED<67) and (currentLED>60))
+   { 
+     RHstrip.setPixelColor(currentLED-61, 0, 0, 0);
+    currentLED=currentLED+1;
+ RHstrip.setPixelColor(currentLED-61, tempRed, tempGreen, tempBlue);
+ RHstrip.show();
+ Serial.println(currentLED);
+ return;
+ }
+ if ((currentLED<75) and (currentLED>68))
+   { 
+ LHstrip.setPixelColor(currentLED-68, 0, 0, 0);
+ currentLED=currentLED-1;
+ LHstrip.setPixelColor(currentLED-68, tempRed, tempGreen, tempBlue);
+ LHstrip.show();
+ Serial.println(currentLED);
+ return;
+ }
+if (currentLED==51)
+ {outerstrip.setPixelColor(51, 0, 0, 0);
+currentLED=0;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+return;
+}
+if (currentLED==68)
+ {LHstrip.setPixelColor(0, 0, 0, 0);
+ LHstrip.show();
+currentLED=56;
+ Vstrip.setPixelColor(4, tempRed, tempGreen, tempBlue);
+ Vstrip.show();
+return;
+}
+if (currentLED==56)
+ {Vstrip.setPixelColor(4, 0, 0, 0);
+ Vstrip.show();
+currentLED=61;
+ RHstrip.setPixelColor(0, tempRed, tempGreen, tempBlue);
+ RHstrip.show();
+return;
+}
+if (currentLED==67)
+ {RHstrip.setPixelColor(6, 0, 0, 0);
+currentLED=21;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ RHstrip.show();
+ outerstrip.show();
+return;
+}
+if (currentLED==21)
+ {outerstrip.setPixelColor(currentLED, 0, 0, 0);
+currentLED=46;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+return;
+}
+if (currentLED==20)
+ {outerstrip.setPixelColor(currentLED, 0, 0, 0);
+currentLED=47;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+return;
+}
+if (currentLED==26)
+ {outerstrip.setPixelColor(26, 0, 0, 0);
+currentLED=41;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+return;
+}
+
+}
+void leftPick() ///////////////////////////////////////////////////////////////////////////////////
+{
+  if (currentLED==46)
+ {outerstrip.setPixelColor(currentLED, 0, 0, 0);
+currentLED=21;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+return;
+}
+if (currentLED==47)
+ {outerstrip.setPixelColor(currentLED, 0, 0, 0);
+currentLED=20;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+return;
+}
+  if ((currentLED==20) or (currentLED==21))
+  {
+    outerstrip.setPixelColor(currentLED, 0, 0, 0);
+ outerstrip.show();
+ currentLED=67;
+ RHstrip.setPixelColor(6, tempRed, tempGreen, tempBlue);
+ RHstrip.show();
+ return;
+  }
+    if ((currentLED>61) and (currentLED<68))
+  {
+    currentLED=currentLED-1;
+ RHstrip.setPixelColor(currentLED-60, 0, 0, 0);
+ RHstrip.setPixelColor(currentLED-61, tempRed, tempGreen, tempBlue);
+ RHstrip.show();
+ return;
+  }
+   if (currentLED==74)
+  {
+currentLED=47;
+    LHstrip.setPixelColor(6, 0, 0, 0);
+    LHstrip.show();
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+  }
+  if (currentLED==61)
+  {
+currentLED=56;
+    RHstrip.setPixelColor(0, 0, 0, 0);
+    RHstrip.show();
+ Vstrip.setPixelColor(4, tempRed, tempGreen, tempBlue);
+ Vstrip.show();
+ return;
+  }
+   if (currentLED==56)
+  {
+currentLED=68;
+    Vstrip.setPixelColor(4, 0, 0, 0);
+    Vstrip.show();
+ LHstrip.setPixelColor(0, tempRed, tempGreen, tempBlue);
+ LHstrip.show();
+ return;
+  }
+   if (currentLED==68)
+  {
+currentLED=currentLED+1;
+    LHstrip.setPixelColor(currentLED-69, 0, 0, 0);
+    LHstrip.show();
+ LHstrip.setPixelColor(currentLED-68, tempRed, tempGreen, tempBlue);
+ LHstrip.show();
+ return;
+  }
+  if ((currentLED>68) and (currentLED<74))
+  {
+    currentLED=currentLED+1;
+ LHstrip.setPixelColor(currentLED-69, 0, 0, 0);
+ LHstrip.setPixelColor(currentLED-68, tempRed, tempGreen, tempBlue);
+ LHstrip.show();
+ return;
+  }
+  if (currentLED==0)
+  {
+currentLED=15;
+    outerstrip.setPixelColor(0, 0, 0, 0);
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+  }
+  if (currentLED<16)
+  {
+currentLED=currentLED-1;
+    outerstrip.setPixelColor(currentLED+1, 0, 0, 0);
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+  }
+if (currentLED==25)
+  {
+    currentLED=currentLED+1;
+    outerstrip.setPixelColor(currentLED-1, 0, 0, 0);
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+}
+if (currentLED==41)
+  {
+    currentLED=26;
+    outerstrip.setPixelColor(41, 0, 0, 0);
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+}
+if ((currentLED>25) and (currentLED<41))
+  {
+    currentLED=currentLED+1;
+ outerstrip.setPixelColor(currentLED-1, 0, 0, 0);
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ Serial.println(currentLED);
+ return;
+}
+
+}
+
+void upPick() ///////////////////////////////////////////////////////////////////////////////////////
+{
+  if (currentLED==7)
+  {
+ outerstrip.setPixelColor(currentLED, 0, 0, 0);
+ outerstrip.show();
+ currentLED=34;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ Serial.println(currentLED);
+ return;
+}
+  if (currentLED==8)
+  {
+ outerstrip.setPixelColor(currentLED, 0, 0, 0);
+ outerstrip.show();
+ currentLED=33;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ Serial.println(currentLED);
+ return;
+}
+   if (currentLED==16)
+  {
+ outerstrip.setPixelColor(currentLED, 0, 0, 0);
+ outerstrip.show();
+ currentLED=25;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ Serial.println(currentLED);
+ return;
+}
+ if (currentLED==51)
+  {
+ outerstrip.setPixelColor(currentLED, 0, 0, 0);
+ outerstrip.show();
+ currentLED=42;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ Serial.println(currentLED);
+ return;
+}
+    if (currentLED==41)
+  {
+    Serial.println(currentLED);
+ outerstrip.setPixelColor(currentLED, 0, 0, 0);
+ outerstrip.show();
+ currentLED=currentLED+1;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ Serial.println(currentLED);
+ return;
+}
+if ((currentLED==33) or (currentLED==34))
+  {
+ outerstrip.setPixelColor(33, 0, 0, 0);
+ outerstrip.setPixelColor(34, 0, 0, 0);
+ outerstrip.show();
+ currentLED=52;
+ Vstrip.setPixelColor(currentLED-52, tempRed, tempGreen, tempBlue);
+ Vstrip.show();
+ return;
+}
+if ((currentLED>51) and (currentLED<60))
+  {
+    currentLED=currentLED+1;
+    Vstrip.setPixelColor(currentLED-53, 0, 0, 0);
+  Vstrip.setPixelColor(currentLED-52, tempRed, tempGreen, tempBlue);
+ Vstrip.show();
+ return;
+}
+if (currentLED==60)
+  {
+    Vstrip.setPixelColor(8, 0, 0, 0);
+     Vstrip.show();
+ currentLED=8;
+  outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+}
+  if ((currentLED>41) and (currentLED<51))
+  {
+    currentLED=currentLED+1;   
+ outerstrip.setPixelColor(currentLED-1, 0, 0, 0);
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+}
+  if ((currentLED>15) and (currentLED<27))
+  {   
+ outerstrip.setPixelColor(currentLED, 0, 0, 0);
+ currentLED=currentLED-1;   
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+}
+}
+
+void downPick()  ///////////////////////////////////////////////////////////////////////////////////
+{
+  if (currentLED==-1)
+  {
+   currentLED=51;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+  Serial.println("down from middle");
+ return;
+}
+   if ((currentLED>6) and (currentLED<9))
+  {
+     outerstrip.setPixelColor(currentLED, 0, 0, 0);
+     outerstrip.show();
+    currentLED=60;
+ Vstrip.setPixelColor(currentLED-52, tempRed, tempGreen, tempBlue);
+ Vstrip.show();
+ return;
+  }
+  if (currentLED==52)
+  {
+     Vstrip.setPixelColor(0, 0, 0, 0);
+     Vstrip.show();
+    currentLED=34;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+  }
+  if (currentLED==34)
+  {
+     outerstrip.setPixelColor(currentLED, 0, 0, 0);
+     outerstrip.show();
+    currentLED=7;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+  }
+  if (currentLED==33)
+  {
+     outerstrip.setPixelColor(currentLED, 0, 0, 0);
+     outerstrip.show();
+    currentLED=8;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+  }
+     if ((currentLED>51) and (currentLED<62))
+  {
+     Vstrip.setPixelColor(currentLED-52, 0, 0, 0);
+    currentLED=currentLED-1;
+ Vstrip.setPixelColor(currentLED-52, tempRed, tempGreen, tempBlue);
+ Vstrip.show();
+ Serial.println(currentLED);
+ return;
+  }
+  if (currentLED==42)
+  {
+   outerstrip.setPixelColor(42, 0, 0, 0);
+   currentLED=51;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+  Serial.println("down from middle");
+ return;
+}
+    if (currentLED==0)
+  {
+  
+   outerstrip.setPixelColor(currentLED, 0, 0, 0);
+   currentLED=51;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+}
+    if (currentLED==25)
+  {
+  
+   outerstrip.setPixelColor(currentLED, 0, 0, 0);
+   currentLED=16;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+}
+  if (currentLED==15)
+  {
+    currentLED=currentLED+1;
+   outerstrip.setPixelColor(currentLED-1, 0, 0, 0);
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+}
+  if ((currentLED>15) and (currentLED<25))
+  {
+    currentLED=currentLED+1;
+ outerstrip.setPixelColor(currentLED-1, 0, 0, 0);
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+}
+ if ((currentLED>42) and (currentLED<52))
+  {
+     outerstrip.setPixelColor(currentLED, 0, 0, 0);
+    currentLED=currentLED-1;
+ outerstrip.setPixelColor(currentLED, tempRed, tempGreen, tempBlue);
+ outerstrip.show();
+ return;
+  }
+ 
+}
+
+void setGreen(){
+
+switch(tempGreen){
+case 0:
+tempGreen=255;
+delay(150);
+break;
+case 255:
+tempGreen=192;
+delay(150);
+break;
+case 192:
+tempGreen=128;
+delay(150);
+break;
+case 128:
+tempGreen=64;
+delay(150);
+break;
+case 64:
+tempGreen=0;
+delay(150);
+break;
+}
+Serial.println(tempGreen);
+}
+
+void setBlue(){
+switch(tempBlue){
+case 0:
+tempBlue=255;
+delay(150);
+break;
+case 255:
+tempBlue=192;
+delay(150);
+break;
+case 192:
+tempBlue=128;
+delay(150);
+break;
+case 128:
+tempBlue=64;
+delay(150);
+break;
+case 64:
+tempBlue=0;
+delay(150);
+break;
+
+}
+Serial.println(tempBlue);
+}
+
+void setRed(){
+
+switch(tempRed){
+case 0:
+tempRed=255;
+delay(150);
+break;
+case 255:
+tempRed=192;
+delay(150);
+break;
+case 192:
+tempRed=128;
+delay(150);
+break;
+case 128:
+tempRed=64;
+delay(150);
+break;
+case 64:
+tempRed=0;
+delay(150);
+break;
+}
+Serial.println(tempRed);
+}
+
